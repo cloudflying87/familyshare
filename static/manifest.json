@@ -1,0 +1,16 @@
+{
+  "name": "Hostingsite",
+  "short_name": "Hostingsite",
+  "description": "this will be used to host static react or markdown files.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0066cc",
+  "theme_color": "#0066cc",
+  "icons": [
+    {
+      "src": "/static/img/default-share.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
