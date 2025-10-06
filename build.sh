@@ -8,7 +8,7 @@
 # ============================================================================
 
 # PROJECT CONFIGURATION - CHANGE THESE
-PROJECT_NAME="hostingsite"                    # ← CHANGE THIS
+PROJECT_NAME="hostingsite"
 REMOTE_SERVER="your-user@your-server-ip"           # ← CHANGE THIS (optional)
 REMOTE_BACKUP_DIR="/path/to/backups"               # ← CHANGE THIS (optional)
 
@@ -118,7 +118,7 @@ run_migrations() {
     if grep -q "would create" /tmp/migration_check.log; then
         echo -e "${YELLOW}New migrations detected, creating them...${NC}"
         # Add your app names here
-        for app in core; do  # ← ADD YOUR APP NAMES HERE
+        for app in core accounts; do  # ← ADD YOUR APP NAMES HERE
             sudo docker compose exec web python manage.py makemigrations $app
         done
     else
@@ -437,13 +437,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-
-# Validation checks
-if [[ -z "$PROJECT_NAME" || "$PROJECT_NAME" = "hostingsite" ]]; then
-    echo -e "${RED}✗ ERROR: Please customize PROJECT_NAME in this script${NC}"
-    echo -e "${YELLOW}Edit this file and change PROJECT_NAME=\"hostingsite\" to your actual project name${NC}"
-    exit 1
-fi
 
 # Check if date is provided when needed
 if [[ ("$BACKUP_all" = true || "$BACKUP_local" = true || "$RESTORE" = true || "$DOWNLOAD" = true || "$REBUILD" = true) && -z "$USER_DATE" ]]; then
