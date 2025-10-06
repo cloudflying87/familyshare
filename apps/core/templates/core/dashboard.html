@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Family Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Family Dashboard</h1>
+    <p>Welcome! Click on any item below to view the content.</p>
+</div>
+
+<div class="container">
+    {% if contents %}
+        <div class="content-grid">
+            {% for content in contents %}
+                <a href="{% url 'core:content_detail' content.slug %}" class="content-card">
+                    <div class="content-card__header">
+                        <h2 class="content-card__title">{{ content.title }}</h2>
+                        <span class="content-card__badge {% if content.content_type == 'markdown' %}content-card__badge--markdown{% endif %}">
+                            {{ content.get_content_type_display }}
+                        </span>
+                    </div>
+                    {% if content.description %}
+                        <p class="content-card__description">{{ content.description }}</p>
+                    {% endif %}
+                    <div class="content-card__meta">
+                        Last updated: {{ content.updated_at|date:"M d, Y" }}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center p-5">
+            <h2>No content yet</h2>
+            <p class="text-secondary">Content items will appear here once they're added.</p>
+            <p class="mt-3">
+                <a href="/admin/" class="btn btn-primary">Go to Admin Panel to add content</a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

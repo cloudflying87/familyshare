@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Family Dashboard{% endblock %}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block description %}Family dashboard for sharing content, articles, and interactive pages{% endblock %}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Family Dashboard{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Family dashboard for sharing content, articles, and interactive pages{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/share-preview.png' %}{% endblock %}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{% block twitter_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}Family Dashboard{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Family dashboard for sharing content, articles, and interactive pages{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}{% static 'images/share-preview.png' %}{% endblock %}">
+
+    <!-- Mobile Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Family Dashboard">
+    <meta name="theme-color" content="#667eea">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
+    {% block extra_css %}{% endblock %}
+    <style>
+        /* Dashboard-specific styles */
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: var(--spacing-xl) var(--spacing-md);
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .dashboard-header h1 {
+            color: white;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-md);
+        }
+
+        @media (min-width: 768px) {
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) {
+            .content-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .content-card {
+            background: var(--bg-primary);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-base);
+            text-decoration: none;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            opacity: 1;
+        }
+
+        .content-card__header {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .content-card__title {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-size: 1.25rem;
+        }
+
+        .content-card__badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .content-card__badge--markdown {
+            background: var(--accent-color);
+        }
+
+        .content-card__description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content-card__meta {
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

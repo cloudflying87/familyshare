@@ -7,5 +7,6 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.dashboard, name='dashboard'),
+    path('content/<slug:slug>/', views.content_detail, name='content_detail'),
 ]
