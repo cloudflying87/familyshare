@@ -139,7 +139,39 @@ class CarAdmin(admin.ModelAdmin):
 
     def import_url(self, request):
         """Handle URL-based car import with AI parsing."""
-        if request.method == 'POST' and 'paste_html' in request.POST:
+        # IMPORTANT: Check save_car FIRST before other conditions!
+        if request.method == 'POST' and 'save_car' in request.POST:
+            # Save the car from the review form
+            try:
+                car_data = {
+                    'make': request.POST.get('make', ''),
+                    'model': request.POST.get('model', ''),
+                    'trim': request.POST.get('trim', ''),
+                    'year': int(request.POST.get('year', 0)) if request.POST.get('year') else 0,
+                    'url': request.POST.get('url', ''),
+                    'vin': request.POST.get('vin', ''),
+                    'stock': request.POST.get('stock', ''),
+                    'dealer': request.POST.get('dealer', ''),
+                    'price': float(request.POST.get('price', 0)) if request.POST.get('price') else 0,
+                    'mileage': int(request.POST.get('mileage', 0)) if request.POST.get('mileage') else 0,
+                    'winter_rating': int(request.POST.get('winter_rating', 5)),
+                    'reliability_rating': int(request.POST.get('reliability_rating', 5)),
+                    'recommendation': request.POST.get('recommendation', 'acceptable'),
+                    'mpg_highway': int(request.POST.get('mpg_highway')) if request.POST.get('mpg_highway') else None,
+                    'mpg_city': int(request.POST.get('mpg_city')) if request.POST.get('mpg_city') else None,
+                    'ground_clearance': float(request.POST.get('ground_clearance')) if request.POST.get('ground_clearance') else None,
+                    'notes': request.POST.get('notes', ''),
+                }
+
+                car = Car.objects.create(**car_data)
+                messages.success(request, f'Successfully imported {car}')
+                return redirect('..')
+
+            except Exception as e:
+                messages.error(request, f'Error saving car: {str(e)}')
+                return redirect('..')
+
+        elif request.method == 'POST' and 'paste_html' in request.POST:
             # User pasted HTML directly - no HTTP request needed
             url = request.POST.get('url', '').strip()
             html_content = request.POST.get('html_content', '').strip()
@@ -148,10 +180,28 @@ class CarAdmin(admin.ModelAdmin):
                 messages.error(request, 'Please provide both URL and HTML content.')
                 return render(request, 'admin/car_url_import.html', {'title': 'Import Car from URL'})
 
-            messages.info(request, f'Parsing {len(html_content)} characters of HTML content...')
+            messages.info(request, f'Parsing {len(html_content)} characters of content...')
 
             try:
                 extracted_data = self._extract_car_data(html_content, url)
+
+                # Debug: Show what was extracted
+                debug_fields = []
+                if extracted_data.get('vin'):
+                    debug_fields.append(f"VIN: {extracted_data['vin']}")
+                if extracted_data.get('stock'):
+                    debug_fields.append(f"Stock: {extracted_data['stock']}")
+                if extracted_data.get('price'):
+                    debug_fields.append(f"Price: ${extracted_data['price']}")
+                if extracted_data.get('mileage'):
+                    debug_fields.append(f"Mileage: {extracted_data['mileage']}")
+                if extracted_data.get('mpg_city') and extracted_data.get('mpg_highway'):
+                    debug_fields.append(f"MPG: {extracted_data['mpg_city']}/{extracted_data['mpg_highway']}")
+
+                if debug_fields:
+                    messages.success(request, f"Found: {', '.join(debug_fields)}")
+                else:
+                    messages.warning(request, "No data automatically extracted - please fill in manually")
                 return render(request, 'admin/car_url_import_form.html', {
                     'title': 'Review Extracted Car Data',
                     'extracted_data': extracted_data,
@@ -205,37 +255,6 @@ class CarAdmin(admin.ModelAdmin):
                 messages.error(request, f'Error fetching URL: {str(e)}')
                 return render(request, 'admin/car_url_import.html', {'title': 'Import Car from URL'})
 
-        elif request.method == 'POST' and 'save_car' in request.POST:
-            # Save the car from the review form
-            try:
-                car_data = {
-                    'make': request.POST.get('make', ''),
-                    'model': request.POST.get('model', ''),
-                    'trim': request.POST.get('trim', ''),
-                    'year': int(request.POST.get('year', 0)) if request.POST.get('year') else 0,
-                    'url': request.POST.get('url', ''),
-                    'vin': request.POST.get('vin', ''),
-                    'stock': request.POST.get('stock', ''),
-                    'dealer': request.POST.get('dealer', ''),
-                    'price': float(request.POST.get('price', 0)) if request.POST.get('price') else 0,
-                    'mileage': int(request.POST.get('mileage', 0)) if request.POST.get('mileage') else 0,
-                    'winter_rating': int(request.POST.get('winter_rating', 5)),
-                    'reliability_rating': int(request.POST.get('reliability_rating', 5)),
-                    'recommendation': request.POST.get('recommendation', 'acceptable'),
-                    'mpg_highway': int(request.POST.get('mpg_highway')) if request.POST.get('mpg_highway') else None,
-                    'mpg_city': int(request.POST.get('mpg_city')) if request.POST.get('mpg_city') else None,
-                    'ground_clearance': float(request.POST.get('ground_clearance')) if request.POST.get('ground_clearance') else None,
-                    'notes': request.POST.get('notes', ''),
-                }
-
-                car = Car.objects.create(**car_data)
-                messages.success(request, f'Successfully imported {car}')
-                return redirect('..')
-
-            except Exception as e:
-                messages.error(request, f'Error saving car: {str(e)}')
-                return redirect('..')
-
         # GET request - show URL input form
         return render(request, 'admin/car_url_import.html', {'title': 'Import Car from URL'})
 
@@ -261,22 +280,109 @@ class CarAdmin(admin.ModelAdmin):
             'notes': '',
         }
 
-        # Try to find JSON-LD structured data first
-        json_ld_match = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.DOTALL)
+        # Try to find DITagLocalization JavaScript variable (Dealer Inspire sites like Bloomington Subaru)
+        ditag_match = re.search(r'var\s+DITagLocalization\s*=\s*({.*?});', html, re.DOTALL)
+        if ditag_match:
+            try:
+                ditag_json = json.loads(ditag_match.group(1))
+                vehicle_info = ditag_json.get('vehicleInfo', {})
+                dealer_info = ditag_json.get('dealer', {})
+
+                if vehicle_info:
+                    data['vin'] = vehicle_info.get('vin', '')
+                    data['stock'] = vehicle_info.get('stock', '')
+                    data['year'] = str(vehicle_info.get('year', ''))
+                    data['make'] = vehicle_info.get('make', '')
+                    data['model'] = vehicle_info.get('model', '')
+                    data['trim'] = vehicle_info.get('trim', '')
+                    data['price'] = str(vehicle_info.get('price', '') or vehicle_info.get('our_price', ''))
+                    # DITag doesn't have mileage, we'll get that from text
+
+                if dealer_info:
+                    city = dealer_info.get('city', '')
+                    state = dealer_info.get('state', '')
+                    data['dealer'] = f"{city} {dealer_info.get('brands', '')}" if city else ''
+
+            except Exception as e:
+                # If JSON parsing fails, fall back to other methods
+                pass
+
+        # Try to find JSON-LD structured data (overrides DITag if present and has more data)
+        json_ld_match = re.search(r'<script type=["\']application/ld\+json["\']>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
         if json_ld_match:
             try:
                 json_data = json.loads(json_ld_match.group(1))
-                if isinstance(json_data, dict) and json_data.get('@type') == 'Car':
-                    data['make'] = json_data.get('brand', {}).get('name', '') if isinstance(json_data.get('brand'), dict) else json_data.get('brand', '')
-                    data['model'] = json_data.get('model', '')
-                    data['year'] = json_data.get('modelDate', '') or json_data.get('productionDate', '')[:4] if json_data.get('productionDate') else ''
-                    if json_data.get('offers'):
+
+                # Check if @type is 'Car' or includes 'Car' (could be array like ["Product", "Car"])
+                type_field = json_data.get('@type', '')
+                is_car = (type_field == 'Car' or
+                         (isinstance(type_field, list) and 'Car' in type_field))
+
+                if isinstance(json_data, dict) and is_car:
+                    # Brand/Make
+                    if not data['make'] and json_data.get('brand'):
+                        brand = json_data['brand']
+                        data['make'] = brand.get('name', '') if isinstance(brand, dict) else str(brand)
+
+                    # Model
+                    if not data['model']:
+                        data['model'] = json_data.get('model', '')
+
+                    # Year - try multiple fields
+                    if not data['year']:
+                        data['year'] = (json_data.get('vehicleModelDate', '') or
+                                       json_data.get('modelDate', '') or
+                                       json_data.get('productionDate', '')[:4] if json_data.get('productionDate') else '')
+
+                    # Trim - extract from name if not already set
+                    if not data['trim'] and json_data.get('name'):
+                        # Name format: "Pre-Owned 2015 Subaru Outback 2.5i Premium"
+                        # Extract trim (last part after model)
+                        name = json_data['name']
+                        if data['model'] and data['model'] in name:
+                            trim_part = name.split(data['model'])[-1].strip()
+                            data['trim'] = trim_part
+
+                    # VIN
+                    if not data['vin']:
+                        data['vin'] = json_data.get('vehicleIdentificationNumber', '')
+
+                    # Stock from SKU
+                    if not data['stock']:
+                        data['stock'] = json_data.get('sku', '')
+
+                    # Price
+                    if not data['price'] and json_data.get('offers'):
                         offers = json_data['offers']
                         if isinstance(offers, dict):
                             data['price'] = str(offers.get('price', ''))
-                    data['mileage'] = json_data.get('mileageFromOdometer', {}).get('value', '') if isinstance(json_data.get('mileageFromOdometer'), dict) else ''
-                    data['vin'] = json_data.get('vehicleIdentificationNumber', '')
-            except:
+
+                    # Mileage
+                    if not data['mileage'] and json_data.get('mileageFromOdometer'):
+                        mileage_obj = json_data['mileageFromOdometer']
+                        if isinstance(mileage_obj, dict):
+                            data['mileage'] = str(mileage_obj.get('value', ''))
+                        else:
+                            data['mileage'] = str(mileage_obj)
+
+                    # Description for notes
+                    if not data['notes'] and json_data.get('description'):
+                        import html
+                        description = json_data['description']
+                        # Decode HTML entities (&amp; -> &, &lt;br /&gt; -> <br />)
+                        description = html.unescape(description)
+                        # Remove <br /> tags and replace with newlines
+                        description = re.sub(r'<br\s*/?\s*>', '\n', description, flags=re.IGNORECASE)
+                        # Remove any remaining HTML tags
+                        description = re.sub(r'<[^>]+>', '', description)
+                        # Clean up multiple newlines
+                        description = re.sub(r'\n\s*\n\s*\n+', '\n\n', description)
+                        # Truncate if too long (keep first 500 chars)
+                        if len(description) > 500:
+                            description = description[:500] + '...'
+                        data['notes'] = description.strip()
+            except Exception as e:
+                # If JSON parsing fails, continue with regex patterns
                 pass
 
         # Extract VIN (17 characters, alphanumeric)
@@ -296,11 +402,18 @@ class CarAdmin(admin.ModelAdmin):
             if price_match:
                 data['price'] = price_match.group(1).replace(',', '')
 
-        # Extract Mileage
+        # Extract Mileage - try multiple patterns
         if not data['mileage']:
+            # Pattern 1: "Mileage: 73,065" or "Mileage:\n73,065"
             mileage_match = re.search(r'Mileage[:\s]*([0-9,]+)', html, re.IGNORECASE)
             if mileage_match:
                 data['mileage'] = mileage_match.group(1).replace(',', '')
+            else:
+                # Pattern 2: Just numbers with comma (likely mileage if 5-6 digits)
+                # Look for standalone numbers that look like mileage
+                mileage_match = re.search(r'(?:miles|mi|odometer)[:\s]*([0-9,]+)', html, re.IGNORECASE)
+                if mileage_match:
+                    data['mileage'] = mileage_match.group(1).replace(',', '')
 
         # Extract MPG
         mpg_match = re.search(r'([0-9]+)\s*CITY\s*/\s*([0-9]+)\s*HWY', html, re.IGNORECASE)
