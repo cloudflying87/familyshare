@@ -8,6 +8,7 @@ import csv
 import io
 import json
 import re
+import html as html_lib
 try:
     import httpx
 except ImportError:
@@ -367,10 +368,9 @@ class CarAdmin(admin.ModelAdmin):
 
                     # Description for notes
                     if not data['notes'] and json_data.get('description'):
-                        import html
                         description = json_data['description']
                         # Decode HTML entities (&amp; -> &, &lt;br /&gt; -> <br />)
-                        description = html.unescape(description)
+                        description = html_lib.unescape(description)
                         # Remove <br /> tags and replace with newlines
                         description = re.sub(r'<br\s*/?\s*>', '\n', description, flags=re.IGNORECASE)
                         # Remove any remaining HTML tags
