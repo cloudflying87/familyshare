@@ -1,0 +1,185 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 20px;">
+    <h1>{{ title }}</h1>
+
+    <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0;">
+            ✅ Successfully extracted data from the listing! Review the information below and make any corrections before saving.
+        </p>
+    </div>
+
+    <form method="post" style="background: white; border: 1px solid #ddd; padding: 20px; border-radius: 4px;">
+        {% csrf_token %}
+        <input type="hidden" name="save_car" value="1">
+
+        <!-- Vehicle Information -->
+        <fieldset style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <legend style="font-weight: bold; font-size: 18px; padding: 0 10px;">🚗 Vehicle Information</legend>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Make *</label>
+                    <input type="text" name="make" value="{{ extracted_data.make }}" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Model *</label>
+                    <input type="text" name="model" value="{{ extracted_data.model }}" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Year *</label>
+                    <input type="number" name="year" value="{{ extracted_data.year }}" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Trim</label>
+                    <input type="text" name="trim" value="{{ extracted_data.trim }}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Listing Details -->
+        <fieldset style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <legend style="font-weight: bold; font-size: 18px; padding: 0 10px;">📋 Listing Details</legend>
+
+            <div style="margin-top: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px;">URL *</label>
+                <input type="url" name="url" value="{{ extracted_data.url }}" required readonly
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f5f5f5; box-sizing: border-box;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">VIN</label>
+                    <input type="text" name="vin" value="{{ extracted_data.vin }}" maxlength="17"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Stock #</label>
+                    <input type="text" name="stock" value="{{ extracted_data.stock }}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Dealer *</label>
+                    <input type="text" name="dealer" value="{{ extracted_data.dealer }}" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Price ($) *</label>
+                    <input type="number" name="price" value="{{ extracted_data.price }}" step="0.01" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Mileage *</label>
+                    <input type="number" name="mileage" value="{{ extracted_data.mileage }}" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Performance Ratings -->
+        <fieldset style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <legend style="font-weight: bold; font-size: 18px; padding: 0 10px;">⭐ Performance Ratings</legend>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                These ratings are auto-filled based on your comparison data. Adjust if needed.
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Winter Rating (1-10) *</label>
+                    <input type="number" name="winter_rating" value="{{ extracted_data.winter_rating }}" min="1" max="10" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <small style="color: #666;">Subarus=10, AWD=7-8, FWD=3-5</small>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Reliability (1-10) *</label>
+                    <input type="number" name="reliability_rating" value="{{ extracted_data.reliability_rating }}" min="1" max="10" required
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <small style="color: #666;">Check year-specific issues</small>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Recommendation *</label>
+                    <select name="recommendation" required
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                        <option value="excellent" {% if extracted_data.recommendation == 'excellent' %}selected{% endif %}>🏆 Excellent</option>
+                        <option value="good" {% if extracted_data.recommendation == 'good' %}selected{% endif %}>✅ Good</option>
+                        <option value="acceptable" {% if extracted_data.recommendation == 'acceptable' %}selected{% endif %}>⚠️ Acceptable</option>
+                        <option value="avoid" {% if extracted_data.recommendation == 'avoid' %}selected{% endif %}>❌ Avoid</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Specifications -->
+        <fieldset style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <legend style="font-weight: bold; font-size: 18px; padding: 0 10px;">🔧 Specifications</legend>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">MPG City</label>
+                    <input type="number" name="mpg_city" value="{{ extracted_data.mpg_city }}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">MPG Highway</label>
+                    <input type="number" name="mpg_highway" value="{{ extracted_data.mpg_highway }}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Ground Clearance (in)</label>
+                    <input type="number" name="ground_clearance" value="{{ extracted_data.ground_clearance }}" step="0.1"
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Notes -->
+        <fieldset style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <legend style="font-weight: bold; font-size: 18px; padding: 0 10px;">📝 Notes</legend>
+
+            <div style="margin-top: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px;">Additional Notes</label>
+                <textarea name="notes" rows="4"
+                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; box-sizing: border-box;">{{ extracted_data.notes }}</textarea>
+            </div>
+        </fieldset>
+
+        <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <button type="submit"
+                    style="background: #28a745; color: white; padding: 14px 28px; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                💾 Save Car
+            </button>
+            <a href="{% url 'admin:core_car_import_url' %}"
+               style="margin-left: 10px; padding: 14px 28px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 16px;">
+                ← Back to URL Entry
+            </a>
+            <a href="{% url 'admin:core_car_changelist' %}"
+               style="margin-left: 10px; padding: 14px 28px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 16px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Mobile-friendly styles */
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+        div[style*="max-width: 900px"] {
+            padding: 10px !important;
+        }
+        button, a {
+            display: block !important;
+            width: 100% !important;
+            margin: 10px 0 !important;
+            text-align: center !important;
+        }
+    }
+</style>
+{% endblock %}

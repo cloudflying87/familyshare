@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Car Shopping - Family Dashboard{% endblock %}
+
+{% block description %}Compare cars for cold-climate driving{% endblock %}
+
+{% block extra_css %}
+<style>
+    .car-list {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--spacing-lg);
+    }
+
+    .car-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: var(--spacing-xl) var(--spacing-lg);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .car-header h1 {
+        color: white;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .car-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: var(--bg-primary);
+        border: var(--border-width) solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .car-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xxl);
+    }
+
+    .car-card {
+        background: var(--bg-primary);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .car-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .car-card.excellent {
+        border-color: #22c55e;
+        background: linear-gradient(to bottom, #f0fdf4 0%, var(--bg-primary) 100%);
+    }
+
+    .car-card.good {
+        border-color: #3b82f6;
+        background: linear-gradient(to bottom, #eff6ff 0%, var(--bg-primary) 100%);
+    }
+
+    .car-card.acceptable {
+        border-color: #eab308;
+        background: linear-gradient(to bottom, #fefce8 0%, var(--bg-primary) 100%);
+    }
+
+    .car-card.avoid {
+        border-color: #ef4444;
+        background: linear-gradient(to bottom, #fef2f2 0%, var(--bg-primary) 100%);
+    }
+
+    .car-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .car-badge {
+        display: inline-block;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .badge-excellent {
+        background: #22c55e;
+        color: white;
+    }
+
+    .badge-good {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .badge-acceptable {
+        background: #eab308;
+        color: white;
+    }
+
+    .badge-avoid {
+        background: #ef4444;
+        color: white;
+    }
+
+    .car-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+    }
+
+    .detail-item {
+        font-size: 0.875rem;
+    }
+
+    .detail-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .car-ratings {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .rating-item {
+        flex: 1;
+        text-align: center;
+        padding: var(--spacing-sm);
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+    }
+
+    .rating-score {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .rating-score.high {
+        color: #22c55e;
+    }
+
+    .rating-score.medium {
+        color: #eab308;
+    }
+
+    .rating-score.low {
+        color: #ef4444;
+    }
+
+    .rating-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .car-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .car-dealer {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .car-link {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .car-link:hover {
+        opacity: 0.8;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-lg);
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        opacity: 0.8;
+    }
+
+    .no-cars {
+        text-align: center;
+        padding: var(--spacing-xxl);
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .car-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .car-ratings {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="car-list">
+    <a href="{% url 'core:dashboard' %}" class="back-link">&larr; Back to Dashboard</a>
+
+    <div class="car-header">
+        <h1>🚗 Car Shopping Comparison</h1>
+        <p>Compare cars for cold-climate driving with highway focus</p>
+    </div>
+
+    {% if total_cars > 0 %}
+        <div class="car-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_cars }}</div>
+                <div class="stat-label">Total Cars</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ excellent_count }}</div>
+                <div class="stat-label">🏆 Excellent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ good_count }}</div>
+                <div class="stat-label">✅ Good</div>
+            </div>
+        </div>
+
+        <div class="car-grid">
+            {% for car in cars %}
+                <div class="car-card {{ car.recommendation }}">
+                    <div class="car-title">
+                        {{ car.year }} {{ car.make }} {{ car.model }}
+                        {% if car.trim %}
+                            <div style="font-size: 0.875rem; font-weight: normal; color: var(--text-secondary);">{{ car.trim }}</div>
+                        {% endif %}
+                    </div>
+
+                    <span class="car-badge badge-{{ car.recommendation }}">
+                        {{ car.get_recommendation_display }}
+                    </span>
+
+                    <div class="car-price">${{ car.price|floatformat:0 }}</div>
+                    <div class="car-dealer">{{ car.dealer }}</div>
+
+                    <div class="car-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Mileage</div>
+                            <div class="detail-value">{{ car.mileage|floatformat:0 }} mi</div>
+                        </div>
+                        {% if car.mpg_highway %}
+                        <div class="detail-item">
+                            <div class="detail-label">Highway MPG</div>
+                            <div class="detail-value">{{ car.mpg_highway }}</div>
+                        </div>
+                        {% endif %}
+                        {% if car.ground_clearance %}
+                        <div class="detail-item">
+                            <div class="detail-label">Clearance</div>
+                            <div class="detail-value">{{ car.ground_clearance }}"</div>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <div class="detail-label">Overall Score</div>
+                            <div class="detail-value">{{ car.get_overall_score }}/10</div>
+                        </div>
+                    </div>
+
+                    <div class="car-ratings">
+                        <div class="rating-item">
+                            <div class="rating-score {% if car.winter_rating >= 8 %}high{% elif car.winter_rating >= 5 %}medium{% else %}low{% endif %}">
+                                {{ car.winter_rating }}/10
+                            </div>
+                            <div class="rating-label">❄️ Winter</div>
+                        </div>
+                        <div class="rating-item">
+                            <div class="rating-score {% if car.reliability_rating >= 8 %}high{% elif car.reliability_rating >= 5 %}medium{% else %}low{% endif %}">
+                                {{ car.reliability_rating }}/10
+                            </div>
+                            <div class="rating-label">🔧 Reliability</div>
+                        </div>
+                    </div>
+
+                    {% if car.notes %}
+                    <div style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background: var(--bg-secondary); border-radius: var(--border-radius); font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+                        {{ car.notes|truncatewords:25 }}
+                        {% if car.notes|wordcount > 25 %}
+                            <a href="{% url 'core:car_detail' car.pk %}" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Read more...</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                        <a href="{% url 'core:car_detail' car.pk %}" class="car-link" style="flex: 1; background: var(--primary-color);">
+                            View Details →
+                        </a>
+                        <a href="{{ car.url }}" target="_blank" class="car-link" style="flex: 1; background: #6b7280;">
+                            Dealer Listing ↗
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-cars">
+            <h2>No cars added yet</h2>
+            <p>Check back later for car comparisons!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

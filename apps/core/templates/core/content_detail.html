@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ content.title }} - Family Dashboard{% endblock %}
 
@@ -145,6 +146,16 @@
 <div class="content-detail">
     <a href="{% url 'core:dashboard' %}" class="back-link">&larr; Back to Dashboard</a>
 
+    {% if messages %}
+        <div style="margin-bottom: var(--spacing-lg);">
+            {% for message in messages %}
+                <div style="padding: var(--spacing-md); border-radius: var(--border-radius); background-color: {% if message.tags == 'success' %}#f0fdf4{% else %}#fee2e2{% endif %}; border: 1px solid {% if message.tags == 'success' %}#22c55e{% else %}#ef4444{% endif %}; color: {% if message.tags == 'success' %}#166534{% else %}#991b1b{% endif %};">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="content-header">
         <h1>{{ content.title }}</h1>
         <div class="content-header__meta">
@@ -157,14 +168,102 @@
             {{ rendered_content|safe }}
         {% elif content.content_type == 'react' %}
             <div id="react-root" class="react-container"></div>
-            <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-            <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/recharts@2.5.0/dist/Recharts.min.js"></script>
-            <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+            <script crossorigin src="{% static 'js/vendor/react.production.min.js' %}"></script>
+            <script crossorigin src="{% static 'js/vendor/react-dom.production.min.js' %}"></script>
+            <!-- Recharts: Add if needed for charts - not included by default -->
+            <script src="{% static 'js/vendor/babel.min.js' %}"></script>
             <script type="text/babel">
                 {{ content.content|safe }}
             </script>
         {% endif %}
+    </div>
+
+    <!-- Comments Section -->
+    <div style="max-width: 900px; margin: var(--spacing-xxl) auto 0; padding: var(--spacing-lg);">
+        <h2 style="margin-bottom: var(--spacing-lg); color: var(--text-primary);">
+            Comments ({{ comments.count }})
+        </h2>
+
+        <!-- Existing Comments -->
+        {% if comments %}
+            <div style="margin-bottom: var(--spacing-xl);">
+                {% for comment in comments %}
+                    <div style="background: var(--bg-secondary); border-radius: var(--border-radius); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); border-left: 4px solid var(--primary-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                            <strong style="color: var(--primary-color);">{{ comment.author_name }}</strong>
+                            <span style="color: var(--text-muted); font-size: 0.875rem;">{{ comment.created_at|date:"M d, Y g:i A" }}</span>
+                        </div>
+                        <p style="color: var(--text-primary); line-height: 1.6; margin: 0; white-space: pre-wrap;">{{ comment.comment_text }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); margin-bottom: var(--spacing-xl);">No comments yet. Be the first to comment!</p>
+        {% endif %}
+
+        <!-- Add Comment Form -->
+        <div style="background: var(--bg-primary); border: var(--border-width) solid var(--border-color); border-radius: var(--border-radius); padding: var(--spacing-xl); box-shadow: var(--shadow-sm);">
+            <h3 style="margin-bottom: var(--spacing-lg); color: var(--text-primary);">Add a Comment</h3>
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Honeypot field (hidden from users, visible to bots) -->
+                <div style="position: absolute; left: -9999px;">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div style="margin-bottom: var(--spacing-md);">
+                    <label for="author_name" style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600; color: var(--text-primary);">Your Name</label>
+                    <input
+                        type="text"
+                        id="author_name"
+                        name="author_name"
+                        required
+                        style="width: 100%; padding: var(--spacing-sm); border: var(--border-width) solid var(--border-color); border-radius: var(--border-radius); font-size: 1rem;"
+                        placeholder="Enter your name"
+                    >
+                </div>
+                <div style="margin-bottom: var(--spacing-md);">
+                    <label for="comment_text" style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600; color: var(--text-primary);">Comment</label>
+                    <textarea
+                        id="comment_text"
+                        name="comment_text"
+                        required
+                        rows="4"
+                        style="width: 100%; padding: var(--spacing-sm); border: var(--border-width) solid var(--border-color); border-radius: var(--border-radius); font-size: 1rem; resize: vertical;"
+                        placeholder="Share your thoughts..."
+                    ></textarea>
+                </div>
+
+                <!-- Math CAPTCHA -->
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <label for="captcha" style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600; color: var(--text-primary);">
+                        What is {{ captcha_question }}?
+                    </label>
+                    <input
+                        type="number"
+                        id="captcha"
+                        name="captcha"
+                        required
+                        style="width: 100px; padding: var(--spacing-sm); border: var(--border-width) solid var(--border-color); border-radius: var(--border-radius); font-size: 1rem;"
+                        placeholder="Answer"
+                    >
+                    <small style="display: block; margin-top: var(--spacing-xs); color: var(--text-muted);">
+                        This helps prevent spam
+                    </small>
+                </div>
+
+                <button
+                    type="submit"
+                    style="background: var(--primary-color); color: white; padding: var(--spacing-sm) var(--spacing-lg); border: none; border-radius: var(--border-radius); font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity var(--transition-fast);"
+                    onmouseover="this.style.opacity='0.8'"
+                    onmouseout="this.style.opacity='1'"
+                >
+                    Post Comment
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

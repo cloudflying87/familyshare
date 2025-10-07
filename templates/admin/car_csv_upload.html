@@ -1,0 +1,86 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 40px auto; padding: 20px;">
+    <h1>{{ title }}</h1>
+
+    <div style="background: #e8f4f8; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0;">📝 How to Use</h3>
+        <ol style="margin: 10px 0;">
+            <li>Download the sample CSV template below (or create your own)</li>
+            <li>Fill in your car data using Excel, Google Sheets, or any spreadsheet app</li>
+            <li>Save/Export as CSV</li>
+            <li>Upload the CSV file using the form below</li>
+        </ol>
+    </div>
+
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0;">⚡ Quick Reference</h3>
+        <ul style="margin: 10px 0;">
+            <li><strong>recommendation</strong>: excellent, good, acceptable, avoid</li>
+            <li><strong>winter_rating</strong>: 1-10 (Subarus=10, AWD SUVs=7-8, FWD=3-5)</li>
+            <li><strong>reliability_rating</strong>: 1-10 (check year-specific issues)</li>
+            <li><strong>url</strong>: Used as unique identifier - if URL exists, car will be updated</li>
+        </ul>
+    </div>
+
+    <div style="background: white; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h3>📥 Sample CSV Template</h3>
+        <p>Copy this and paste into Excel/Google Sheets, or <a href="#download-sample" onclick="downloadSample(); return false;">download sample.csv</a></p>
+        <pre style="background: #f5f5f5; padding: 15px; overflow-x: auto; border-radius: 4px; font-family: monospace; font-size: 12px;">make,model,trim,year,url,dealer,price,mileage,winter_rating,reliability_rating,recommendation,mpg_highway,mpg_city,ground_clearance,notes
+Subaru,Forester,2.5i Premium,2015,https://example.com/car1,Bloomington Subaru,14500,85000,10,7,acceptable,28,22,8.7,Borderline year but good deal
+Subaru,Outback,Limited,2017,https://example.com/car2,Local Motors,18900,62000,10,9,excellent,32,26,8.7,Best overall choice</pre>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="background: white; border: 1px solid #ddd; padding: 20px; border-radius: 4px;">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 20px;">
+            <label for="csv_file" style="display: block; font-weight: bold; margin-bottom: 10px;">
+                Select CSV File:
+            </label>
+            <input type="file" name="csv_file" id="csv_file" accept=".csv" required
+                   style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 500px;">
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="submit"
+                    style="background: #417690; color: white; padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer;">
+                Upload and Import Cars
+            </button>
+            <a href="{% url 'admin:core_car_changelist' %}"
+               style="margin-left: 10px; padding: 12px 24px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Cancel
+            </a>
+        </div>
+    </form>
+
+    <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <h4 style="margin-top: 0;">💡 Tips</h4>
+        <ul>
+            <li>Leave optional fields (mpg_highway, mpg_city, ground_clearance, notes) blank if unknown</li>
+            <li>Make sure your CSV has column headers that match the sample exactly</li>
+            <li>If a car with the same URL already exists, it will be updated with new data</li>
+            <li>You can re-upload the same file with changes to update existing cars</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function downloadSample() {
+    const csvContent = `make,model,trim,year,url,dealer,price,mileage,winter_rating,reliability_rating,recommendation,mpg_highway,mpg_city,ground_clearance,notes
+Subaru,Forester,2.5i Premium,2015,https://example.com/car1,Bloomington Subaru,14500,85000,10,7,acceptable,28,22,8.7,Borderline year but good deal
+Subaru,Outback,Limited,2017,https://example.com/car2,Local Motors,18900,62000,10,9,excellent,32,26,8.7,Best overall choice`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'car_import_sample.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ car.year }} {{ car.make }} {{ car.model }} - Car Details{% endblock %}
+
+{% block description %}Detailed information about {{ car.year }} {{ car.make }} {{ car.model }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .car-detail {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: var(--spacing-lg);
+    }
+
+    .car-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: var(--spacing-xl) var(--spacing-lg);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .car-header h1 {
+        color: white;
+        margin-bottom: var(--spacing-sm);
+        font-size: 2rem;
+    }
+
+    .car-badge {
+        display: inline-block;
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .badge-excellent {
+        background: #22c55e;
+        color: white;
+    }
+
+    .badge-good {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .badge-acceptable {
+        background: #eab308;
+        color: white;
+    }
+
+    .badge-avoid {
+        background: #ef4444;
+        color: white;
+    }
+
+    .car-price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        margin: var(--spacing-md) 0;
+    }
+
+    .car-body {
+        background: var(--bg-primary);
+        border: var(--border-width) solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .info-section {
+        background: var(--bg-secondary);
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+    }
+
+    .info-section h3 {
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-md);
+        font-size: 1.1rem;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .rating-section {
+        background: linear-gradient(to bottom, #f0f9ff 0%, var(--bg-primary) 100%);
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .rating-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .rating-card {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .rating-score {
+        font-size: 3rem;
+        font-weight: bold;
+        margin: var(--spacing-sm) 0;
+    }
+
+    .rating-score.high {
+        color: #22c55e;
+    }
+
+    .rating-score.medium {
+        color: #eab308;
+    }
+
+    .rating-score.low {
+        color: #ef4444;
+    }
+
+    .rating-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .notes-section {
+        background: #fffbeb;
+        border-left: 4px solid #eab308;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .notes-section h3 {
+        color: #92400e;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .notes-section p {
+        color: var(--text-primary);
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        font-weight: 600;
+        text-align: center;
+        transition: opacity 0.2s;
+        display: inline-block;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-lg);
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+        .car-price {
+            font-size: 2rem;
+        }
+
+        .rating-score {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="car-detail">
+    <a href="{% url 'core:car_list' %}" class="back-link">&larr; Back to Car List</a>
+
+    <div class="car-header">
+        <span class="car-badge badge-{{ car.recommendation }}">
+            {{ car.get_recommendation_display }}
+        </span>
+
+        <h1>{{ car.year }} {{ car.make }} {{ car.model }}</h1>
+        {% if car.trim %}
+            <p style="font-size: 1.25rem; opacity: 0.9; margin-bottom: var(--spacing-sm);">{{ car.trim }}</p>
+        {% endif %}
+
+        <div class="car-price">${{ car.price|floatformat:0 }}</div>
+
+        <p style="opacity: 0.9; font-size: 1rem;">{{ car.dealer }}</p>
+    </div>
+
+    <div class="rating-section">
+        <h2 style="text-align: center; margin-bottom: var(--spacing-xl); color: var(--text-primary);">Performance Ratings</h2>
+        <div class="rating-grid">
+            <div class="rating-card">
+                <div class="rating-label">❄️ Winter Performance</div>
+                <div class="rating-score {% if car.winter_rating >= 8 %}high{% elif car.winter_rating >= 5 %}medium{% else %}low{% endif %}">
+                    {{ car.winter_rating }}<span style="font-size: 1.5rem; color: var(--text-secondary);">/10</span>
+                </div>
+            </div>
+
+            <div class="rating-card">
+                <div class="rating-label">🔧 Reliability</div>
+                <div class="rating-score {% if car.reliability_rating >= 8 %}high{% elif car.reliability_rating >= 5 %}medium{% else %}low{% endif %}">
+                    {{ car.reliability_rating }}<span style="font-size: 1.5rem; color: var(--text-secondary);">/10</span>
+                </div>
+            </div>
+
+            <div class="rating-card">
+                <div class="rating-label">⭐ Overall Score</div>
+                <div class="rating-score {% if car.get_overall_score >= 8 %}high{% elif car.get_overall_score >= 5 %}medium{% else %}low{% endif %}">
+                    {{ car.get_overall_score }}<span style="font-size: 1.5rem; color: var(--text-secondary);">/10</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="car-body">
+        <div class="info-grid">
+            <div class="info-section">
+                <h3>📋 Listing Details</h3>
+                <div class="info-item">
+                    <span class="info-label">Mileage</span>
+                    <span class="info-value">{{ car.mileage|floatformat:0 }} miles</span>
+                </div>
+                {% if car.vin %}
+                <div class="info-item">
+                    <span class="info-label">VIN</span>
+                    <span class="info-value" style="font-family: monospace; font-size: 0.875rem;">{{ car.vin }}</span>
+                </div>
+                {% endif %}
+                {% if car.stock %}
+                <div class="info-item">
+                    <span class="info-label">Stock #</span>
+                    <span class="info-value">{{ car.stock }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="info-section">
+                <h3>⛽ Fuel Economy</h3>
+                {% if car.mpg_city %}
+                <div class="info-item">
+                    <span class="info-label">City MPG</span>
+                    <span class="info-value">{{ car.mpg_city }}</span>
+                </div>
+                {% endif %}
+                {% if car.mpg_highway %}
+                <div class="info-item">
+                    <span class="info-label">Highway MPG</span>
+                    <span class="info-value">{{ car.mpg_highway }}</span>
+                </div>
+                {% endif %}
+                {% if car.get_combined_mpg %}
+                <div class="info-item">
+                    <span class="info-label">Combined MPG</span>
+                    <span class="info-value">{{ car.get_combined_mpg }}</span>
+                </div>
+                {% endif %}
+                {% if not car.mpg_city and not car.mpg_highway %}
+                <p style="color: var(--text-secondary); font-style: italic;">MPG data not available</p>
+                {% endif %}
+            </div>
+
+            <div class="info-section">
+                <h3>🔧 Specifications</h3>
+                {% if car.ground_clearance %}
+                <div class="info-item">
+                    <span class="info-label">Ground Clearance</span>
+                    <span class="info-value">{{ car.ground_clearance }}"</span>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <span class="info-label">Year</span>
+                    <span class="info-value">{{ car.year }}</span>
+                </div>
+                {% if not car.ground_clearance %}
+                <p style="color: var(--text-secondary); font-style: italic;">Additional specs not available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if car.notes %}
+        <div class="notes-section">
+            <h3>📝 Notes & Observations</h3>
+            <p>{{ car.notes }}</p>
+        </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            <a href="{{ car.url }}" target="_blank" class="btn btn-primary">View Original Listing →</a>
+            <a href="{% url 'core:car_list' %}" class="btn btn-secondary">← Back to All Cars</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

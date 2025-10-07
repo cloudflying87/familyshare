@@ -9,6 +9,24 @@
 </div>
 
 <div class="container">
+    <!-- Special Car Shopping Link -->
+    <div style="margin-bottom: var(--spacing-xl);">
+        <a href="{% url 'core:car_list' %}" class="content-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;">
+            <div class="content-card__header">
+                <h2 class="content-card__title" style="color: white;">🚗 Car Shopping</h2>
+                <span class="content-card__badge" style="background: rgba(255,255,255,0.3); color: white;">
+                    Special
+                </span>
+            </div>
+            <p class="content-card__description" style="color: rgba(255,255,255,0.9);">
+                Compare cars for cold-climate driving with ratings and recommendations
+            </p>
+            <div class="content-card__meta" style="color: rgba(255,255,255,0.8);">
+                Click to view all cars →
+            </div>
+        </a>
+    </div>
+
     {% if contents %}
         <div class="content-grid">
             {% for content in contents %}

@@ -141,6 +141,10 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
+# File Upload Settings
+# Allow up to 10MB for car listing HTML/text paste
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB in bytes
+
 # Logging with structlog
 # See: https://www.structlog.org/en/stable/
 import structlog
