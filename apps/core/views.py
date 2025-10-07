@@ -145,3 +145,61 @@ def car_detail(request, pk):
         'car': car,
     }
     return render(request, 'core/car_detail.html', context)
+
+
+def car_tco_calculator(request):
+    """Total Cost of Ownership calculator for comparing cars."""
+    # Get all cars
+    cars = Car.objects.all().order_by('-recommendation', 'price')
+
+    # Default values
+    years = 5
+    miles_per_year = 12000
+    gas_price = 3.50
+    sales_tax_rate = 0.07
+
+    # Get user inputs if provided
+    if request.method == 'GET':
+        try:
+            years = int(request.GET.get('years', 5))
+            miles_per_year = int(request.GET.get('miles_per_year', 12000))
+            gas_price = float(request.GET.get('gas_price', 3.50))
+            sales_tax_rate = float(request.GET.get('sales_tax_rate', 7.0)) / 100  # Convert from percentage
+        except (ValueError, TypeError):
+            pass  # Use defaults if conversion fails
+
+    # Calculate TCO for each car
+    car_comparisons = []
+    for car in cars:
+        tco = car.calculate_tco(
+            years=years,
+            miles_per_year=miles_per_year,
+            gas_price=gas_price,
+            sales_tax_rate=sales_tax_rate
+        )
+        car_comparisons.append({
+            'car': car,
+            'tco': tco,
+        })
+
+    # Sort by total cost
+    car_comparisons.sort(key=lambda x: x['tco']['total_cost'])
+
+    logger.info(
+        "tco_calculator_viewed",
+        car_count=len(car_comparisons),
+        years=years,
+        miles_per_year=miles_per_year,
+        gas_price=gas_price,
+        sales_tax_rate=sales_tax_rate
+    )
+
+    context = {
+        'car_comparisons': car_comparisons,
+        'years': years,
+        'miles_per_year': miles_per_year,
+        'gas_price': gas_price,
+        'sales_tax_rate': sales_tax_rate * 100,  # Convert back to percentage for display
+        'total_miles': miles_per_year * years,
+    }
+    return render(request, 'core/car_tco_calculator.html', context)

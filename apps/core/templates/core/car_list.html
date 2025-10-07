@@ -257,6 +257,9 @@
     <div class="car-header">
         <h1>🚗 Car Shopping Comparison</h1>
         <p>Compare cars for cold-climate driving with highway focus</p>
+        <a href="{% url 'core:car_tco_calculator' %}" style="display: inline-block; margin-top: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-lg); background: white; color: #667eea; text-decoration: none; border-radius: var(--border-radius); font-weight: 600; transition: opacity 0.2s;">
+            💰 Calculate Total Cost of Ownership →
+        </a>
     </div>
 
     {% if total_cars > 0 %}

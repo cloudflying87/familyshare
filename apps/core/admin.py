@@ -51,7 +51,7 @@ class CarAdmin(admin.ModelAdmin):
             'description': 'Rate on 1-10 scale. Winter: Subarus=10, AWD=7-8, FWD=3-5. Reliability: Check year-specific issues.'
         }),
         ('Specifications', {
-            'fields': ['mpg_highway', 'mpg_city', 'ground_clearance']
+            'fields': ['mpg_highway', 'mpg_city', 'combined_mpg', 'ground_clearance', 'maintenance_cost']
         }),
         ('Notes & Comparison', {
             'fields': ['notes', 'comparison_notes'],

@@ -83,6 +83,7 @@ class Car(models.Model):
     # Fuel Economy
     mpg_highway = models.IntegerField(null=True, blank=True, help_text="Highway MPG")
     mpg_city = models.IntegerField(null=True, blank=True, help_text="City MPG")
+    combined_mpg = models.IntegerField(null=True, blank=True, help_text="Combined MPG (auto-calculated or manual override)")
 
     # Specs
     ground_clearance = models.DecimalField(
@@ -91,6 +92,15 @@ class Car(models.Model):
         null=True,
         blank=True,
         help_text="Ground clearance in inches (e.g., 8.7)"
+    )
+
+    # Cost of Ownership
+    maintenance_cost = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Estimated annual maintenance cost (e.g., 800.00)"
     )
 
     # Recommendation
@@ -119,6 +129,12 @@ class Car(models.Model):
     def __str__(self):
         return f"{self.year} {self.make} {self.model} - ${self.price} ({self.dealer})"
 
+    def save(self, *args, **kwargs):
+        """Auto-calculate combined_mpg if not manually set."""
+        if not self.combined_mpg and self.mpg_city and self.mpg_highway:
+            self.combined_mpg = round((self.mpg_city + self.mpg_highway) / 2)
+        super().save(*args, **kwargs)
+
     def get_combined_mpg(self):
         """Calculate combined MPG if both city and highway are available."""
         if self.mpg_city and self.mpg_highway:
@@ -136,3 +152,48 @@ class Car(models.Model):
             score += mpg_score * 0.2
 
         return round(score, 1)
+
+    def calculate_tco(self, years=5, miles_per_year=12000, gas_price=3.50, sales_tax_rate=0.07):
+        """
+        Calculate Total Cost of Ownership.
+
+        Args:
+            years: Number of years to own the vehicle
+            miles_per_year: Annual miles driven
+            gas_price: Price per gallon of gas
+            sales_tax_rate: Sales tax rate (e.g., 0.07 for 7%)
+
+        Returns:
+            dict with cost breakdown
+        """
+        # Purchase price with tax
+        purchase_price = float(self.price)
+        sales_tax = purchase_price * sales_tax_rate
+        total_purchase = purchase_price + sales_tax
+
+        # Annual fuel cost
+        mpg = self.combined_mpg or self.get_combined_mpg() or 25  # Default to 25 if not available
+        gallons_per_year = miles_per_year / mpg
+        annual_fuel_cost = gallons_per_year * gas_price
+        total_fuel_cost = annual_fuel_cost * years
+
+        # Annual maintenance cost
+        annual_maintenance = float(self.maintenance_cost) if self.maintenance_cost else 1000.0  # Default $1000/year
+        total_maintenance_cost = annual_maintenance * years
+
+        # Total cost of ownership
+        total_cost = total_purchase + total_fuel_cost + total_maintenance_cost
+
+        return {
+            'purchase_price': purchase_price,
+            'sales_tax': sales_tax,
+            'total_purchase': total_purchase,
+            'mpg': mpg,
+            'annual_fuel_cost': annual_fuel_cost,
+            'total_fuel_cost': total_fuel_cost,
+            'annual_maintenance': annual_maintenance,
+            'total_maintenance_cost': total_maintenance_cost,
+            'total_cost': total_cost,
+            'cost_per_year': total_cost / years,
+            'cost_per_mile': total_cost / (miles_per_year * years),
+        }
