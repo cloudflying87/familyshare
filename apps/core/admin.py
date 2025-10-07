@@ -140,13 +140,15 @@ class CarAdmin(admin.ModelAdmin):
     def import_url(self, request):
         """Handle URL-based car import with AI parsing."""
         if request.method == 'POST' and 'paste_html' in request.POST:
-            # User pasted HTML directly
+            # User pasted HTML directly - no HTTP request needed
             url = request.POST.get('url', '').strip()
             html_content = request.POST.get('html_content', '').strip()
 
             if not url or not html_content:
                 messages.error(request, 'Please provide both URL and HTML content.')
                 return render(request, 'admin/car_url_import.html', {'title': 'Import Car from URL'})
+
+            messages.info(request, f'Parsing {len(html_content)} characters of HTML content...')
 
             try:
                 extracted_data = self._extract_car_data(html_content, url)
