@@ -8,7 +8,9 @@
 # ============================================================================
 
 # PROJECT CONFIGURATION - CHANGE THESE
-PROJECT_NAME="hostingsite"
+# Load PROJECT_NAME from .env first, fallback to default
+source ./.env.prod 2>/dev/null || source ./.env 2>/dev/null || true
+PROJECT_NAME="${PROJECT_NAME:-hostingsite}"
 REMOTE_SERVER="your-user@your-server-ip"           # ← CHANGE THIS (optional)
 REMOTE_BACKUP_DIR="/path/to/backups"               # ← CHANGE THIS (optional)
 
@@ -30,8 +32,7 @@ MIGRATE=false
 DOWNLOAD=false
 MIGRATION_FIX=false
 
-# Load from environment file
-source ./.env.prod 2>/dev/null || source ./.env 2>/dev/null || true
+# DB defaults (already loaded .env above)
 DB_NAME="${DB_NAME:-${PROJECT_NAME}_db}"
 DB_USER="${DB_USER:-${PROJECT_NAME}_user}"
 
@@ -82,7 +83,7 @@ wait_for_database() {
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
-        if sudo docker exec $DB_CONTAINER pg_isready -U $DB_USER > /dev/null 2>&1; then
+        if sudo docker exec $DB_CONTAINER pg_isready -d $DB_NAME -U $DB_USER > /dev/null 2>&1; then
             echo -e "${GREEN}✓ Database is ready!${NC}"
             return 0
         fi
